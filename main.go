@@ -54,6 +54,8 @@ func deleteCronWorkflow(argoClientset *argo.Clientset, ctx context.Context, name
 
 func main() {
 
+	namespace := "argo"
+
 	argoClientset, err := getClientset()
 	if err != nil {
 		log.Fatalf("Error creating Argo clientset: %v", err)
@@ -86,7 +88,7 @@ func main() {
 		},
 	}
 
-	result, err := argoClientset.ArgoprojV1alpha1().CronWorkflows("default").Create(ctx, cronWorkflow,
+	result, err := argoClientset.ArgoprojV1alpha1().CronWorkflows(namespace).Create(ctx, cronWorkflow,
 		metav1.CreateOptions{})
 	if err != nil {
 		log.Fatalf("Error creating Argo Cron Workflow: %v", err)
@@ -98,7 +100,7 @@ func main() {
 
 	for i := 0; i < 4; i++ {
 		time.Sleep(30 * time.Second)
-		workflows, err := argoClientset.ArgoprojV1alpha1().Workflows("default").List(ctx, metav1.ListOptions{})
+		workflows, err := argoClientset.ArgoprojV1alpha1().Workflows(namespace).List(ctx, metav1.ListOptions{})
 		if err != nil {
 			log.Printf("Error listing Argo Workflows: %v", err)
 			continue
@@ -110,7 +112,7 @@ func main() {
 		}
 	}
 
-	err = deleteCronWorkflow(argoClientset, ctx, "default", result.Name)
+	err = deleteCronWorkflow(argoClientset, ctx, namespace, result.Name)
 	if err != nil {
 		log.Fatalf("Error deleting Argo Cron Workflow: %v", err)
 	}
